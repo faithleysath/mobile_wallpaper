@@ -28,6 +28,7 @@ import DynamicForm from '../components/DynamicForm';
 import { Capacitor } from '@capacitor/core';
 import { Network } from '@capacitor/network';
 import { Filesystem } from '@capacitor/filesystem';
+import { Wallpaper } from '../plugins/wallpaper';
 import './Home.css';
 
 // Mock TodayFortune since it's not in APIService
@@ -125,6 +126,20 @@ const Home: React.FC = () => {
     setSelectedImage(null);
   };
 
+  const handleSetWallpaper = async (uri: string) => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Wallpaper.set({ path: uri });
+        setToastMessage('Wallpaper set successfully!');
+        setShowToast(true);
+      } catch (error) {
+        console.error('Failed to set wallpaper:', error);
+        setToastMessage('Failed to set wallpaper.');
+        setShowToast(true);
+      }
+    }
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -181,9 +196,16 @@ const Home: React.FC = () => {
             {imageUris.map((uri) => (
               <IonCol size="6" key={uri}>
                 <IonImg src={Capacitor.convertFileSrc(uri)} />
-                <IonButton color="danger" expand="full" onClick={() => handleDelete(uri)}>
-                  Delete
-                </IonButton>
+                <div className="button-group">
+                  {Capacitor.isNativePlatform() && (
+                    <IonButton color="primary" expand="full" onClick={() => handleSetWallpaper(uri)}>
+                      Set Wallpaper
+                    </IonButton>
+                  )}
+                  <IonButton color="danger" expand="full" onClick={() => handleDelete(uri)}>
+                    Delete
+                  </IonButton>
+                </div>
               </IonCol>
             ))}
           </IonRow>
